@@ -1,0 +1,24 @@
+when:
+  event: tag
+  ref: refs/tags/authentik/v*
+
+steps:
+  - name: build-and-push
+    image: plugins/docker
+    settings:
+      dockerfile: lifecycle/container/Dockerfile
+      context: .
+      repo: git.dahux.net/dahux-net/authentik
+      registry: git.dahux.net
+      auto_tag: false
+      tags:
+        - ${CI_COMMIT_TAG}
+      build_args:
+        - VERSION=${CI_COMMIT_TAG}
+        - GIT_BUILD_HASH=${CI_COMMIT_SHA}
+      # GeoIP is optional — the Dockerfile skips it when secrets are absent.
+      # To enable, add woodpecker secrets: geoip_account_id, geoip_license_key
+      username:
+        from_secret: docker_registry_user
+      password:
+        from_secret: docker_registry_password
